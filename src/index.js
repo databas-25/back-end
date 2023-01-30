@@ -1,5 +1,6 @@
 const express = require('express');
 const parser = require('body-parser');
+const cors = require('cors');
 require('dotenv').config();
 
 const pool = require('./setup');
@@ -8,6 +9,7 @@ const userRouter = require('./routes/user');
 const PORT = 8000;
 
 const app = express();
+app.use(cors());
 app.use(parser.json());
 app.use((req, res, next) => {
 	req.mysql = pool;
@@ -16,7 +18,7 @@ app.use((req, res, next) => {
 app.use('/user', userRouter);
 // app.use(parser.urlencoded({extended: true}));
 
-app.get('/hello', (req, res) => {
+app.post('/hello', (req, res) => {
 	res.send('Hello, world!');
 });
 
