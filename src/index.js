@@ -19,7 +19,10 @@ app.use('/user', userRouter);
 // app.use(parser.urlencoded({extended: true}));
 
 app.post('/hello', (req, res) => {
-	res.send('Hello, world!');
+	res.send({
+		success: true,
+		data: 'Hello world',
+	});
 });
 
 app.listen(PORT, () => {
