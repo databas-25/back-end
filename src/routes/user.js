@@ -26,6 +26,11 @@ router.post('/addToCart', (req, res) => {
 	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
 
+const jwtOptions = {
+	algorithm: 'HS256',
+	issuer: 'Only-Fans',
+};
+
 router.post('/sign_up', async (req, res) => {
 	// const userName = req.body.user_name;
 	const { username, email, password } = req.body;
@@ -67,7 +72,7 @@ router.post('/sign_in', (req, res) => { // for logging in
 					username: r.user_name,
 					email: r.email,
 				};
-				const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { algorithm: 'HS256', issuer: 'Only-Fans', expiresIn: '1h' });
+				const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { ...jwtOptions, expiresIn: '1h' });
 				res.send({
 					success: true,
 					message: 'login_success',
@@ -88,6 +93,30 @@ router.post('/sign_in', (req, res) => { // for logging in
 				error_data: e,
 			});
 		});
+});
+
+router.post('/token_sign_in', (req, res) => {
+	try {
+		const claims = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, { ...jwtOptions, expiresIn: '1h' });
+		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [claims.user, claims.username, claims.email])
+			.on('result', (r) => {
+				res.send({
+					success: true,
+					user: r,
+				});
+			})
+			.on('error', () => { // If no user matches the claims
+				res.send({
+					success: false,
+					message: 'invalid_token',
+				});
+			});
+	} catch (e) {
+		res.send({
+			success: false,
+			message: 'invalid_token',
+		});
+	}
 });
 
 module.exports = router;
