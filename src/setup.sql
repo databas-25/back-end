@@ -46,11 +46,10 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Users` (
   `User_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `user_name` VARCHAR(45) NULL DEFAULT NULL,
+  `user_name` VARCHAR(45) NOT NULL UNIQUE,
   `account_create_time` DATE NOT NULL,
-  `password_hash` VARCHAR(45) NOT NULL,
-  `salt` VARCHAR(45) NOT NULL,
-  `email` VARCHAR(45) NOT NULL UNIQUE,
+  `password_hash` VARCHAR(70) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
   `permission` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`User_id`))
 ENGINE = InnoDB
