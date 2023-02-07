@@ -4,14 +4,21 @@ const cors = require('cors');
 require('dotenv').config();
 
 const userRouter = require('./routes/user');
+const cartRouter = require('./routes/cart');
+const orderRouter = require('./routes/order');
+const productRouter = require('./routes/product');
 
 const PORT = 8000;
 
 const app = express();
 app.use(cors());
 app.use(parser.json());
-app.use('/user', userRouter);
 // app.use(parser.urlencoded({extended: true}));
+
+app.use('/user', userRouter);
+app.use('/cart', cartRouter);
+app.use('/order', orderRouter);
+app.use('/product', productRouter);
 
 app.post('/hello', (req, res) => {
 	res.send({
