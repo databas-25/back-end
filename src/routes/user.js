@@ -5,11 +5,6 @@ const pool = require('../setup');
 
 const router = express.Router();
 
-router.post('/hej', (req, res) => {
-	req.mysql.query('INSERT INTO Users (account_create_time, password_hash, salt, email) VALUES (CURRENT_DATE(), ?, ?, ?)', [5555, 55555, 'bob8@bob.bob']);
-	res.send({ success: true });
-});
-
 router.post('/addToCart', (req, res) => {
 	res.send({
 		success: true,
@@ -29,6 +24,7 @@ router.post('/addToCart', (req, res) => {
 const jwtOptions = {
 	algorithm: 'HS256',
 	issuer: 'Only-Fans',
+	expiresIn: '1h',
 };
 
 router.post('/sign_up', async (req, res) => {
@@ -38,10 +34,18 @@ router.post('/sign_up', async (req, res) => {
 	const passwordHash = await bcrypt.hash(password, salt);
 
 	pool.query('INSERT INTO Users (account_create_time, user_name, email, password_hash) VALUES (CURRENT_DATE(), ?, ?, ?)', [username, email, passwordHash])
-		.on('result', () => {
+		.on('result', (r) => {
+			const data = {
+				user: r.User_id,
+				username: r.user_name,
+				email: r.email,
+			};
+			const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
 			res.send({
 				success: true,
 				message: 'account_registered',
+				user: r,
+				token,
 			});
 		})
 		.on('error', (e) => {
@@ -72,7 +76,7 @@ router.post('/sign_in', (req, res) => { // for logging in
 					username: r.user_name,
 					email: r.email,
 				};
-				const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { ...jwtOptions, expiresIn: '1h' });
+				const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
 				res.send({
 					success: true,
 					message: 'login_success',
@@ -97,7 +101,7 @@ router.post('/sign_in', (req, res) => { // for logging in
 
 router.post('/token_sign_in', (req, res) => {
 	try {
-		const claims = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, { ...jwtOptions, expiresIn: '1h' });
+		const claims = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
 		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [claims.user, claims.username, claims.email])
 			.on('result', (r) => {
 				res.send({

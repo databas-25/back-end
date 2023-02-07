@@ -26,3 +26,16 @@ services:
     restart: always
     ports:
       - 8081:80
+
+  webserver:
+    image: node
+    links:
+      - db
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      DOCKER_HOST: db
+    ports:
+      - '8000:8000'
+    command: bash -c 'npm run dev'

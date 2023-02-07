@@ -3,17 +3,6 @@
 -- Model: New Model    Version: 1.0
 -- MySQL Workbench Forward Engineering
 
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-
--- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
--- -----------------------------------------------------
--- Schema shopping_db
--- -----------------------------------------------------
-
 -- -----------------------------------------------------
 -- Schema shopping_db
 -- -----------------------------------------------------
@@ -37,7 +26,6 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `effect` INT(11) NULL DEFAULT NULL,
   `sound` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`Product_id`))
-ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
@@ -52,7 +40,6 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Users` (
   `email` VARCHAR(45) NOT NULL,
   `permission` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`User_id`))
-ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
@@ -72,32 +59,37 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Basket_Items` (
     REFERENCES `shopping_db`.`Users` (`User_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `shopping_db`.`Order_History`
+-- Table `shopping_db`.`Order`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `shopping_db`.`Order_History` (
+CREATE TABLE IF NOT EXISTS `shopping_db`.`Order` (
   `Order_id` INT(11) NOT NULL,
-  `Products_Product_id` INT(11) NOT NULL,
   `Users_User_id` INT(11) NOT NULL,
-  `amount` INT(11) NULL DEFAULT NULL,
   `timestamp` DATE NULL DEFAULT NULL,
   PRIMARY KEY (`Order_id`),
-  FOREIGN KEY (`Products_Product_id`)
-    REFERENCES `shopping_db`.`Products` (`Product_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   FOREIGN KEY (`Users_User_id`)
     REFERENCES `shopping_db`.`Users` (`User_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+-- -----------------------------------------------------
+-- Table `shopping_db`.`Order_Item`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `shopping_db`.`Order_Item` (
+  `Order_Order_id` INT(11) NOT NULL,
+  `Products_Product_id` INT(11) NOT NULL,
+  `amount` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`Order_Order_id`, `Products_Product_id`),
+  FOREIGN KEY (`Products_Product_id`)
+    REFERENCES `shopping_db`.`Products` (`Product_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  FOREIGN KEY (`Order_Order_id`)
+    REFERENCES `shopping_db`.`Order` (`Order_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+DEFAULT CHARACTER SET = utf8;
