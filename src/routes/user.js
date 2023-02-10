@@ -123,4 +123,22 @@ router.post('/token_sign_in', (req, res) => {
 	}
 });
 
+router.post('/update', (req, res) => {
+	try {
+		pool.query(
+			  'UPDATE '
+			+   'Users '
+			+ 'SET '
+			+   'user_name = ?, '
+			+   'email = ? '
+			+ 'WHERE '
+			+   'User_id = ? '
+			, [req.body.username, req.body.email, req.body.user]);
+		res.send({success: true});
+	} catch (e) {
+		console.error(e);
+		res.send({success: false});
+	}
+});
+
 module.exports = router;
