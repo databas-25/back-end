@@ -5,22 +5,6 @@ const pool = require('../setup');
 
 const router = express.Router();
 
-router.post('/addToCart', (req, res) => {
-	res.send({
-		success: true,
-	});
-
-	const sql = 'INSERT INTO Basket_Items '
-		+ '(Users_User_id, Products_Product_id, Amount) '
-		+ 'VALUES '
-		+ '(?, ?, ?)'
-		+ 'ON DUPLICATE KEY UPDATE '
-		+ 'Amount = Amount + 1';
-	pool.query(sql, [req.body.userID, req.body.productID, 1]);
-	// req.mysql.query("INSERT INTO Basket_Items (Users_User_id, Products_Product_id, Amount)
-	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
-});
-
 const jwtOptions = {
 	algorithm: 'HS256',
 	issuer: 'Only-Fans',
@@ -30,6 +14,7 @@ const jwtOptions = {
 router.post('/sign_up', async (req, res) => {
 	// const userName = req.body.user_name;
 	const { username, email, password } = req.body;
+
 	const salt = await bcrypt.genSalt(10);
 	const passwordHash = await bcrypt.hash(password, salt);
 
@@ -68,6 +53,7 @@ router.post('/sign_up', async (req, res) => {
 });
 
 router.post('/sign_in', (req, res) => { // for logging in
+	console.log("Sign in!", req.body);
 	pool.query('SELECT * FROM Users WHERE user_name=?', [req.body.username])
 		.on('result', async (r) => {
 			if (await bcrypt.compare(req.body.password, r.password_hash)) {
@@ -101,8 +87,8 @@ router.post('/sign_in', (req, res) => { // for logging in
 
 router.post('/token_sign_in', (req, res) => {
 	try {
-		const claims = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
-		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [claims.user, claims.username, claims.email])
+		const { user, username, email } = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
+		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [user, username, email])
 			.on('result', (r) => {
 				res.send({
 					success: true,
@@ -122,5 +108,6 @@ router.post('/token_sign_in', (req, res) => {
 		});
 	}
 });
+
 
 module.exports = router;

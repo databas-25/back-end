@@ -37,6 +37,22 @@ router.post('/fetch_items', (req, res) => {
 			success: false,
 		});
 	}
+})
+
+router.post('/add_item', (req, res) => {
+	res.send({
+		success: true,
+	});
+
+	const sql = 'INSERT INTO Basket_Items '
+		+ '(Users_User_id, Products_Product_id, Amount) '
+		+ 'VALUES '
+		+ '(?, ?, ?)'
+		+ 'ON DUPLICATE KEY UPDATE '
+		+ 'Amount = Amount + 1';
+	pool.query(sql, [req.body.userID, req.body.productID, 1]);
+	// req.mysql.query("INSERT INTO Basket_Items (Users_User_id, Products_Product_id, Amount)
+	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
 
 module.exports = router;

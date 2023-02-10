@@ -15,11 +15,11 @@ USE `shopping_db` ;
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `Product_id` INT(11) NOT NULL AUTO_INCREMENT,
   `product_name` VARCHAR(45) NOT NULL,
-  `img_adress` VARCHAR(45) NULL DEFAULT NULL,
+  `img_address` VARCHAR(45) NULL DEFAULT NULL,
   `price` INT(11) NOT NULL,
   `description` MEDIUMTEXT NULL DEFAULT NULL,
   `manufacturer` VARCHAR(45) NULL DEFAULT NULL,
-  `radius` VARCHAR(45) NULL DEFAULT NULL,
+  `radius` INT(11) NULL DEFAULT NULL,
   `units_sold` INT(11) NULL DEFAULT '0',
   `color` VARCHAR(45) NULL DEFAULT NULL,
   `rpm` INT(11) NULL DEFAULT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Users` (
   `account_create_time` DATE NOT NULL,
   `password_hash` VARCHAR(70) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
-  `permission` INT(11) NULL DEFAULT NULL,
+  `permission` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`User_id`))
 DEFAULT CHARACTER SET = utf8;
 
