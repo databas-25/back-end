@@ -109,6 +109,19 @@ router.post('/token_sign_in', (req, res) => {
 	}
 });
 
+function getUser(uid) {
+	try {
+		pool.query('SELECT * FROM Users WHERE User_id=?', [uid]).on('result', (r) => {
+			return r;
+		}).on('error', (e) => {
+			console.log(e);
+			return;
+		})
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 router.post('/update', (req, res) => {
 	try {
 		pool.query(
@@ -120,7 +133,7 @@ router.post('/update', (req, res) => {
 			+ 'WHERE '
 			+   'User_id = ? '
 			, [req.body.username, req.body.email, req.body.user]).on('result', (r) => {
-				res.send({success: true, user: r});
+				res.send({success: true, result: r, user: getUser(req.body.user)});
 			}).on('error', (e) => {
 				res.send({success: false, error: e, message: 'Error from database when trying to update user info'});
 			});
