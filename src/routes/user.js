@@ -119,11 +119,13 @@ router.post('/update', (req, res) => {
 			+   'email = ? '
 			+ 'WHERE '
 			+   'User_id = ? '
-			, [req.body.username, req.body.email, req.body.user]);
-		res.send({success: true});
+			, [req.body.username, req.body.email, req.body.user]).on('result', (r) => {
+				res.send({success: true, user: r});
+			}).on('error', (e) => {
+				res.send({success: false, error: e, message: 'Error from database when trying to update user info'});
+			});
 	} catch (e) {
-		console.error(e);
-		res.send({success: false});
+		console.error(e);	
 	}
 });
 
