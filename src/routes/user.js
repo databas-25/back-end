@@ -121,11 +121,9 @@ router.post('/token_sign_in', (req, res) => {
 function getUser(uid) {
 	try {
 		pool.query('SELECT * FROM Users WHERE User_id=?', [uid])
-			.on('result', (r) => {
-				return r;
-			}).on('error', (e) => {
+			.on('result', (r) => r)
+			.on('error', (e) => {
 				console.log(e);
-				return;
 			});
 	} catch (error) {
 		console.error(error);

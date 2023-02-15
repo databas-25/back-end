@@ -34,7 +34,7 @@ router.post('/fetch_items', (req, res) => {
 			success: false,
 		});
 	}
-})
+});
 
 router.post('/add_item', (req, res) => {
 	res.send({
