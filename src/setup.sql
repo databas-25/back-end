@@ -15,7 +15,7 @@ USE `shopping_db` ;
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `Product_id` INT(11) NOT NULL AUTO_INCREMENT,
   `product_name` VARCHAR(45) NOT NULL,
-  `img_address` VARCHAR(45) NULL DEFAULT NULL,
+  `img_address` MEDIUMTEXT NULL DEFAULT NULL,
   `price` INT(11) NOT NULL,
   `description` MEDIUMTEXT NULL DEFAULT NULL,
   `manufacturer` VARCHAR(45) NULL DEFAULT NULL,

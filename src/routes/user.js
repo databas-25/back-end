@@ -8,7 +8,7 @@ const router = express.Router();
 const jwtOptions = {
 	algorithm: 'HS256',
 	issuer: 'Only-Fans',
-	expiresIn: '1h',
+	expiresIn: '1d',
 };
 
 router.post('/sign_up', async (req, res) => {
@@ -19,19 +19,29 @@ router.post('/sign_up', async (req, res) => {
 	const passwordHash = await bcrypt.hash(password, salt);
 
 	pool.query('INSERT INTO Users (account_create_time, user_name, email, password_hash) VALUES (CURRENT_DATE(), ?, ?, ?)', [username, email, passwordHash])
-		.on('result', (r) => {
-			const data = {
-				user: r.User_id,
-				username: r.user_name,
-				email: r.email,
-			};
-			const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
-			res.send({
-				success: true,
-				message: 'account_registered',
-				user: r,
-				token,
-			});
+		.on('result', (result) => {
+			pool.query('SELECT * FROM Users WHERE User_id = ?', [result.insertID])
+				.on('result', (r) => {
+					const data = {
+						user: r.User_id,
+						username: r.user_name,
+						email: r.email,
+					};
+					const token = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
+					res.send({
+						success: true,
+						message: 'account_registered',
+						user: r,
+						token,
+					});
+				})
+				.on('error', (e) => {
+					res.send({
+						success: false,
+						message: 'error',
+						error_data: e,
+					});
+				});
 		})
 		.on('error', (e) => {
 			switch (e.code) {
@@ -53,7 +63,6 @@ router.post('/sign_up', async (req, res) => {
 });
 
 router.post('/sign_in', (req, res) => { // for logging in
-	console.log("Sign in!", req.body);
 	pool.query('SELECT * FROM Users WHERE user_name=?', [req.body.username])
 		.on('result', async (r) => {
 			if (await bcrypt.compare(req.body.password, r.password_hash)) {
@@ -111,12 +120,13 @@ router.post('/token_sign_in', (req, res) => {
 
 function getUser(uid) {
 	try {
-		pool.query('SELECT * FROM Users WHERE User_id=?', [uid]).on('result', (r) => {
-			return r;
-		}).on('error', (e) => {
-			console.log(e);
-			return;
-		})
+		pool.query('SELECT * FROM Users WHERE User_id=?', [uid])
+			.on('result', (r) => {
+				return r;
+			}).on('error', (e) => {
+				console.log(e);
+				return;
+			});
 	} catch (error) {
 		console.error(error);
 	}
@@ -125,20 +135,20 @@ function getUser(uid) {
 router.post('/update', (req, res) => {
 	try {
 		pool.query(
-			  'UPDATE '
-			+   'Users '
+			'UPDATE '
+			+ 'Users '
 			+ 'SET '
-			+   'user_name = ?, '
-			+   'email = ? '
+			+ 'user_name = ?, '
+			+ 'email = ? '
 			+ 'WHERE '
-			+   'User_id = ? '
-			, [req.body.username, req.body.email, req.body.user]).on('result', (r) => {
-				res.send({success: true, result: r, user: getUser(req.body.user)});
+			+ 'User_id = ? ', [req.body.username, req.body.email, req.body.user])
+			.on('result', (r) => {
+				res.send({ success: true, result: r, user: getUser(req.body.user) });
 			}).on('error', (e) => {
-				res.send({success: false, error: e, message: 'Error from database when trying to update user info'});
+				res.send({ success: false, error: e, message: 'Error from database when trying to update user info' });
 			});
 	} catch (e) {
-		console.error(e);	
+		console.error(e);
 	}
 });
 

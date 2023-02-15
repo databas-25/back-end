@@ -22,14 +22,11 @@ router.post('/fetch_items', (req, res) => {
 			+ ' 	Basket_Items.Users_User_id = ?;';
 
 		const rows = [];
-		console.log(sql);
 		pool.query(sql, [req.body.userId])
 			.on('result', (r) => {
-				console.log(r);
 				rows.push(r);
 			})
 			.on('end', () => {
-				console.log(rows);
 				res.send({ success: true, data: rows });
 			});
 	} catch (e) {
@@ -38,6 +35,22 @@ router.post('/fetch_items', (req, res) => {
 		});
 	}
 })
+
+router.post('/add_item', (req, res) => {
+	res.send({
+		success: true,
+	});
+
+	const sql = 'INSERT INTO Basket_Items '
+		+ '(Users_User_id, Products_Product_id, Amount) '
+		+ 'VALUES '
+		+ '(?, ?, ?)'
+		+ 'ON DUPLICATE KEY UPDATE '
+		+ 'Amount = Amount + 1';
+	pool.query(sql, [req.body.userID, req.body.productID, 1]);
+	// req.mysql.query("INSERT INTO Basket_Items (Users_User_id, Products_Product_id, Amount)
+	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
+});
 
 router.post('/add_item', (req, res) => {
 	res.send({
