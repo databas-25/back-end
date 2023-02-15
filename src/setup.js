@@ -1,7 +1,6 @@
 const mysql = require('mysql');
 const fs = require('fs');
 
-console.log(process.env.DOCKER_HOST);
 const pool = mysql.createPool({
 	connectionLimit: 10,
 	host: process.env.DOCKER_HOST ?? process.env.DB_HOST,
