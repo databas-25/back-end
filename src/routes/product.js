@@ -52,4 +52,38 @@ router.post('/fetch_items', (req, res) => {
 		});
 });
 
+router.get('/image/:product_id', (req, res) => {
+	pool.query('SELECT img_address FROM Products WHERE Product_id=?', [req.params.product_id])
+		.on('result', (r) => {
+			fetch(r.img_address)
+				.then(async (d) => {
+					res.sendFile(new File(await d.blob(), { type: d.headers.get('content-type') }));
+				})
+				.catch(() => {
+					res.send(404);
+					res.send('Not found');
+				});
+		})
+		.on('error', (e) => {
+			res.status(404);
+			res.send('Not found');
+		});
+});
+
+router.post('/update_amount', (req, res) => {
+	pool.query('UPDATE Basket_Items SET amount=? WHERE Products_Product_id=? AND Users_User_id=?', [req.body.amount, req.body.productID, req.body.userID])
+		.on('result', () => {
+			res.status(200);
+			res.send({
+				success: true,
+			});
+		})
+		.on('error', () => {
+			res.status(500);
+			res.send({
+				success: false,
+			});
+		});
+});
+
 module.exports = router;

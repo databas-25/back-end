@@ -6,13 +6,12 @@ const router = express.Router();
 
 router.post('/fetch_items', (req, res) => {
 	try {
-		console.log(req.body);
-
 		// const claims = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
 
 		const sql = ' SELECT'
 			+ ' Products.product_name,'
 			+ ' Products.price,'
+			+ ' Products.img_address, '
 			+ ' Basket_Items.Products_Product_id,'
 			+ ' Basket_Items.amount'
 			+ ' FROM'
