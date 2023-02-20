@@ -67,4 +67,34 @@ router.post('/add_item', (req, res) => {
 	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
 
+router.post('/clearUser', (req, res) => {
+	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID])
+	.on('result', (r) => {
+		res.send({
+			success: true, 
+			result: r, 
+		});
+	}).on('error', (error) => {
+		res.send({
+			success: false,
+			error_data: error,
+		});
+	});
+})
+
+router.post('/clearItem', (req, res) => {
+	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ? AND Products_Product_id = ?', [req.body.userID, req.body.productID])
+	.on('result', (r) => {
+		res.send({
+			success: true, 
+			result: r, 
+		});
+	}).on('error', (error) => {
+		res.send({
+			success: false,
+			error_data: error,
+		});
+	});
+})
+
 module.exports = router;
