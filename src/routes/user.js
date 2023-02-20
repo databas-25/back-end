@@ -150,8 +150,9 @@ router.post('/update', (req, res) => {
 	}
 });
 
-router.post('/change_password', (req, res) => {
-	pool.query('UPDATE Users SET password_hash = ? WHERE User_id = ?', [req.body.hash, req.body.user])
+router.post('/change_password', async (req, res) => {
+	const passwordHash = await bcrypt.hash(req.body.password, 10);
+	pool.query('UPDATE Users SET password_hash = ? WHERE User_id = ?', [passwordHash, req.body.user])
 	.on('result', (r) => {
 		res.send({success: true, result: r});
 	}).on('error', (error) => {
