@@ -32,6 +32,19 @@ router.post('/create', (req, res) => {
 	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
 
+router.post('/get_one', (req, res) => {
+	pool.query('SELECT * FROM Products WHERE Product_id = ?', [req.body.productID]).on('result', (r) => {
+		res.send({success: true, product: r});
+	}).on('error', (error) => {
+		res.send({
+			success: false,
+			error_data: error,
+		});
+	});
+	
+	
+})
+
 router.post('/fetch_items', (req, res) => {
 	const items = [];
 	pool.query('SELECT * FROM Products', [])
