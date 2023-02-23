@@ -132,8 +132,8 @@ function getUser(uid) {
 
 router.post('/update', (req, res) => {
 	try {
-		pool.query(
-			'UPDATE '
+		pool.query(''
+			+ 'UPDATE '
 			+ 'Users '
 			+ 'SET '
 			+ 'user_name = ?, '
