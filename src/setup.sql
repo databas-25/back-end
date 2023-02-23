@@ -66,7 +66,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `shopping_db`.`Order`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Order` (
-  `Order_id` INT(11) NOT NULL,
+  `Order_id` INT(11) NOT NULL AUTO_INCREMENT,
   `Users_User_id` INT(11) NOT NULL,
   `timestamp` DATE NULL DEFAULT NULL,
   PRIMARY KEY (`Order_id`),
