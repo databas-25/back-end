@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `rpm` INT(11) NULL DEFAULT NULL,
   `effect` INT(11) NULL DEFAULT NULL,
   `sound` INT(11) NULL DEFAULT NULL,
+  `category` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`Product_id`))
 DEFAULT CHARACTER SET = utf8;
 
