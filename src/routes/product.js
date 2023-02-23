@@ -5,17 +5,17 @@ const router = express.Router();
 
 router.post('/create', (req, res) => {
 	const sql = 'INSERT INTO Products '
-		+ '(Product_id, product_name, manufacturer, img_address, price, description) '
+		+ '(product_name, manufacturer, category, img_address, price, description) '
 		+ 'VALUES (?, ?, ?, ?, ?, ?)';
 	const {
-		Product_id: productId,
 		product_name: productName,
 		manufacturer,
 		img_address: imgAddress,
 		price,
 		description,
+		category,
 	} = req.body;
-	pool.query(sql, [productId, productName, manufacturer, imgAddress, price, description])
+	pool.query(sql, [productName, manufacturer, category, imgAddress, price, description])
 		.on('result', (r) => {
 			res.send({
 				success: true,
@@ -34,31 +34,33 @@ router.post('/create', (req, res) => {
 
 router.post('/get_one', (req, res) => {
 	pool.query('SELECT * FROM Products WHERE Product_id = ?', [req.body.productID])
-	.on('result', (r) => {
-		res.send({success: true, product: r});
-	}).on('error', (error) => {
-		res.send({
-			success: false,
-			error_data: error,
+		.on('result', (r) => {
+			res.send({ success: true, product: r });
+		})
+		.on('error', (error) => {
+			res.send({
+				success: false,
+				error_data: error,
+			});
 		});
-	});
-	
-	
-})
+});
 
 router.post('/fetch_items', (req, res) => {
 	const items = [];
+	let errored = false;
 	pool.query('SELECT * FROM Products', [])
 		.on('result', (row) => {
 			items.push(row);
 		})
 		.on('end', () => {
+			if (errored) return;
 			res.send({
 				success: true,
 				products: items,
 			});
 		})
 		.on('error', (error) => {
+			errored = true;
 			res.send({
 				success: false,
 				error_data: error,
@@ -78,7 +80,7 @@ router.get('/image/:product_id', (req, res) => {
 					res.send('Not found');
 				});
 		})
-		.on('error', (e) => {
+		.on('error', () => {
 			res.status(404);
 			res.send('Not found');
 		});
