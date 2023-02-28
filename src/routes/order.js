@@ -33,9 +33,8 @@ router.post('/place', (req, res) => {
 			conn.query('INSERT INTO `Order` (Users_User_id, timestamp) VALUES (?, CURRENT_TIMESTAMP());', [req.body.userID], (error, result) => {
 				if (error) {
 					conn.rollback(() => {
-						throw error;
+						sendError();
 					});
-					sendError();
 					return;
 				}
 
@@ -54,27 +53,24 @@ router.post('/place', (req, res) => {
 				conn.query(sql, [values], () => {
 					if (error) {
 						conn.rollback(() => {
-							throw error;
+							sendError();
 						});
-						sendError();
 						return;
 					}
 
-					conn.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID], () => {
-						if (error) {
+					conn.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID], (delErr, delRes) => {
+						if (delErr || delRes.affectedRows === 0) {
 							conn.rollback(() => {
-								throw error;
+								sendError();
 							});
-							sendError();
 							return;
 						}
 
 						conn.commit((e) => {
 							if (e) {
 								conn.rollback(() => {
-									throw err;
+									sendError();
 								});
-								sendError();
 								return;
 							}
 							conn.release();
