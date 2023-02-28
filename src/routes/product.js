@@ -36,7 +36,8 @@ router.post('/get_one', (req, res) => {
 	pool.query('SELECT * FROM Products WHERE Product_id = ?', [req.body.productID])
 		.on('result', (r) => {
 			res.send({ success: true, product: r });
-		}).on('error', (error) => {
+		})
+		.on('error', (error) => {
 			res.send({
 				success: false,
 				error_data: error,
