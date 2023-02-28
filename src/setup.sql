@@ -70,7 +70,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Order` (
   `Order_id` INT(11) NOT NULL AUTO_INCREMENT,
   `Users_User_id` INT(11) NOT NULL,
-  `timestamp` DATE NULL DEFAULT NULL,
+  `timestamp` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`Order_id`),
   FOREIGN KEY (`Users_User_id`)
     REFERENCES `shopping_db`.`Users` (`User_id`)

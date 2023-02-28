@@ -97,4 +97,20 @@ router.post('/clearItem', (req, res) => {
 		});
 });
 
+router.post('/update_amount', (req, res) => {
+	pool.query('UPDATE Basket_Items SET amount=? WHERE Products_Product_id=? AND Users_User_id=?', [req.body.amount, req.body.productID, req.body.userID])
+		.on('result', () => {
+			res.status(200);
+			res.send({
+				success: true,
+			});
+		})
+		.on('error', () => {
+			res.status(500);
+			res.send({
+				success: false,
+			});
+		});
+});
+
 module.exports = router;
