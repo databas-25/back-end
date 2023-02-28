@@ -85,14 +85,23 @@ router.post('/place', (req, res) => {
 	});
 });
 
-
 router.post('/getHistory', (req, res) => {
-  pool.query('SELECT `Order`.Order_id, `Order`.timestamp, `Order_Item`.Products_Product_id, `Order_Item`.amount FROM `Order` JOIN `Order_Item` ON `Order`.Order_id=`Order_Item`.Order_Order_id WHERE `Order`.Users_User_id=?; ', [req.body.userID])
-  .on('result', (r) => {
-    res.send({success: true, result: r});
-  }).on('error', (e) => {
-    res.send({success: false, error: e});
-  });
+	const sql = 'SELECT `Order`.Order_id, `Order`.timestamp, `Order_Item`.Products_Product_id, `Order_Item`.amount '
+		+ 'FROM `Order` JOIN `Order_Item` ON `Order`.Order_id=`Order_Item`.Order_Order_id '
+		+ 'WHERE `Order`.Users_User_id=?;';
+	pool.query(sql, [req.body.userID])
+		.on('result', (r) => {
+			res.send({
+				success: true,
+				result: r,
+			});
+		})
+		.on('error', (e) => {
+			res.send({
+				success: false,
+				error: e,
+			});
+		});
 });
 
 module.exports = router;
