@@ -36,7 +36,7 @@ router.post('/fetch_items', (req, res) => {
 });
 
 router.post('/get_amount', (req, res) => {
-	pool.query('SELECT SUM(amount) FROM Basket_Items WHERE Users_User_id=?', [req.body.userId], (error, result) => {
+	pool.query('SELECT Sum(amount) AS total_amount FROM Basket_Items WHERE Users_User_id=?', [req.body.userId], (error, result) => {
 		if (error) {
 			res.send({
 				success: false,
@@ -46,7 +46,7 @@ router.post('/get_amount', (req, res) => {
 		}
 		res.send({
 			success: true,
-			result,
+			result: result[0].total_amount,
 		});
 	});
 });
