@@ -4,7 +4,7 @@ const pool = require('../setup');
 const router = express.Router();
 
 router.post('/getForProduct', (req, res) => {
-	pool.query('SELECT * FROM Reviews WHERE Reviews_Product_id=?', [req.body.productID], (err, result) => {
+	pool.query('SELECT * FROM Reviews LEFT JOIN Users ON User_id=Reviews_User_id WHERE Reviews_Product_id=? ORDER BY rating DESC', [req.body.productID], (err, result) => {
 		if (err) {
 			res.send({
 				success: false,
