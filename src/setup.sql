@@ -95,3 +95,23 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Order_Item` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 DEFAULT CHARACTER SET = utf8;
+
+-- -----------------------------------------------------
+-- Table `shopping_db`.`Reviews`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `shopping_db`.`Reviews` (
+  `Reviews_User_id` INT(11) NOT NULL,
+  `Reviews_Product_id` INT(11) NOT NULL,
+  `rating` INT(1) NULL DEFAULT NULL,
+  `body` MEDIUMTEXT NULL DEFAULT NULL,
+  `reviewtime` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`Reviews_User_id`, `Reviews_Product_id`),
+  FOREIGN KEY (`Reviews_Product_id`)
+    REFERENCES `shopping_db`.`Products` (`Product_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  FOREIGN KEY (`Reviews_User_id`)
+    REFERENCES `shopping_db`.`Users` (`User_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+DEFAULT CHARACTER SET = utf8;
