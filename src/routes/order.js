@@ -112,14 +112,22 @@ router.post('/place', (req, res) => {
 });
 
 router.post('/getHistory', (req, res) => {
-	const sql = 'SELECT `Order`.Order_id, `Order`.timestamp, `Order_Item`.Products_Product_id, `Order_Item`.amount '
+	const sql = 'SELECT * FROM `Order` '
+	+ ' LEFT JOIN Order_Item ON `Order`.`Order_id`=Order_Item.Order_Order_id '
+	+ ' LEFT JOIN Products ON `Order_Item`.`Products_Product_id`=Products.Product_id'
+	+ ' WHERE `Order`.Users_User_id=?;';
+	/* const sql = 'SELECT `Order`.Order_id, `Order`.timestamp, `Order_Item`.Products_Product_id, `Order_Item`.amount '
 		+ 'FROM `Order` JOIN `Order_Item` ON `Order`.Order_id=`Order_Item`.Order_Order_id '
-		+ 'WHERE `Order`.Users_User_id=?;';
+		+ 'WHERE `Order`.Users_User_id=?;'; */
+	const items = [];
 	pool.query(sql, [req.body.userID])
 		.on('result', (r) => {
+			items.push(r);
+		})
+		.on('end', () => {
 			res.send({
 				success: true,
-				result: r,
+				result: items,
 			});
 		})
 		.on('error', (e) => {
