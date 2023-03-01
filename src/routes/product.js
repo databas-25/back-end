@@ -1,3 +1,5 @@
+/* eslint-disable no-trailing-spaces */
+
 const express = require('express');
 const pool = require('../setup');
 
@@ -133,8 +135,84 @@ router.post('/unpublish_product', (req, res) => {
 
 router.post('/update_product', (req, res) => {
 	// we need to unpublish the old product and create a new, updated one in its stead. We also need to fix product already in basket
-	// sql = "BEGIN; UPDATE Products SET published=FALSE WHERE Product_id=?; INSERT INTO Products (...) VALUES (...); COMMIT;";
-	pool.query(/* something */)
+	pool.getConnection((connErr, conn) => {
+		const sendError = () => {
+			conn.release();
+			res.send({
+				success: false,
+			});
+		};
+		if (connErr) {
+			sendError();
+			return;
+		}
+		conn.beginTransaction((err) => {
+			if (err) {
+				console.error(err);
+				sendError();
+				return;
+			}
+
+			// create a new product
+			let sql = 'INSERT INTO Products '
+			+ ' (product_name, img_address, price, description, manufacturer, radius, units_sold, color, rpm, effect, sound, category, published)'
+			+ ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+			let values = [
+				req.body.productName,
+				req.body.img_address,
+				req.body.price,
+				req.body.description,
+				req.body.manufacturer,
+				req.body.radius,
+				req.body.units_sold,
+				req.body.color,
+				req.body.rpm,
+				req.body.effect,
+				req.body.sound,
+				req.body.catagory,
+				// eslint-disable-next-line comma-dangle
+				'TRUE'
+			];
+			conn.query(sql, values, (error, result) => {
+				if (error) {
+					conn.rollback(() => {
+						sendError();
+					});
+					return;
+				}
+				
+				sql = 'UPDATE Products SET published=FALSE WHERE Product_id=?';
+				values = [
+					// eslint-disable-next-line comma-dangle
+					req.body.Product_id
+				];
+				conn.query(sql, values, (error2, result2) => {
+					if (error2) {
+						conn.rollback(() => {
+							sendError();
+						});
+						return;
+					}
+
+					// REMEMBER TO RETIE THE REVIEWS
+					conn.commit((e) => {
+						if (e) {
+							conn.rollback(() => {
+								sendError();
+							});
+							return;
+						}
+						conn.release();
+						res.send({
+							success: true,
+						});
+					});
+				});
+			});
+		});
+	});
+
+	pool.query(sql)
 		.on('result', () => {
 			res.status(200);
 			res.send({
