@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Reviews` (
   `Reviews_Product_id` INT(11) NOT NULL,
   `rating` INT(1) NULL DEFAULT NULL,
   `body` MEDIUMTEXT NULL DEFAULT NULL,
-  `reviewtime` DATETIME NULL DEFAULT NULL,
+  `reviewTime` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`Reviews_User_id`, `Reviews_Product_id`),
   FOREIGN KEY (`Reviews_Product_id`)
     REFERENCES `shopping_db`.`Products` (`Product_id`)
