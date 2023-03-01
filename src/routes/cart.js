@@ -35,6 +35,22 @@ router.post('/fetch_items', (req, res) => {
 	}
 });
 
+router.post('/get_amount', (req, res) => {
+	pool.query('SELECT SUM(amount) FROM Basket_Items WHERE Users_User_id=?', [req.body.userId], (error, result) => {
+		if (error) {
+			res.send({
+				success: false,
+				error_data: error,
+			});
+			return;
+		}
+		res.send({
+			success: true,
+			result,
+		});
+	});
+});
+
 router.post('/add_item', (req, res) => {
 	res.send({
 		success: true,
