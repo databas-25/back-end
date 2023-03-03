@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post('/create', (req, res) => {
 	const sql = 'INSERT INTO Products '
-		+ '(Product_id, product_name, manufacturer, img_address, price, description) '
-		+ 'VALUES (?, ?, ?, ?, ?, ?)';
+		+ '(Product_id, product_name, manufacturer, img_address, price, description, category, radius ) '
+		+ 'VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 	const {
 		Product_id: productId,
 		product_name: productName,
@@ -16,8 +16,10 @@ router.post('/create', (req, res) => {
 		img_address: imgAddress,
 		price,
 		description,
+		category,
+		radius,
 	} = req.body;
-	pool.query(sql, [productId, productName, manufacturer, imgAddress, price, description])
+	pool.query(sql, [productId, productName, manufacturer, imgAddress, price, description, category, radius])
 		.on('result', (r) => {
 			res.send({
 				success: true,
