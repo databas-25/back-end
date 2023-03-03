@@ -193,27 +193,9 @@ router.post('/update_product', (req, res) => {
 			sendError();
 			return;
 		}
-		console.log('Begin transaction');
 
 		// create a new product
 		const sql = 'INSERT INTO Products SET ?';
-		// + ' (product_name, img_address, price, description, manufacturer, radius, units_sold, color, rpm, effect, sound, category, published)'
-		// + ` VALUES (${'?, '.repeat(12)}?)`;
-		// const values = [
-		// 	req.body.product_name,
-		// 	req.body.img_address,
-		// 	req.body.price,
-		// 	req.body.description,
-		// 	req.body.manufacturer,
-		// 	req.body.radius,
-		// 	req.body.units_sold,
-		// 	req.body.color,
-		// 	req.body.rpm,
-		// 	req.body.effect,
-		// 	req.body.sound,
-		// 	req.body.category,
-		// 	'TRUE',
-		// ];
 		conn.query(sql, { ...req.body.product, Product_id: null, published: 1 }, onInsertedNew);
 	};
 
@@ -226,20 +208,6 @@ router.post('/update_product', (req, res) => {
 		}
 		conn.beginTransaction(transaction);
 	});
-
-	// pool.query(sql)
-	// 	.on('result', () => {
-	// 		res.status(200);
-	// 		res.send({
-	// 			success: true,
-	// 		});
-	// 	})
-	// 	.on('error', () => {
-	// 		res.status(500);
-	// 		res.send({
-	// 			success: false,
-	// 		});
-	// 	});
 });
 
 module.exports = router;
