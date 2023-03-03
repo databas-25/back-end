@@ -173,8 +173,7 @@ router.post('/update_product', (req, res) => {
 				req.body.effect,
 				req.body.sound,
 				req.body.category,
-				// eslint-disable-next-line comma-dangle
-				'TRUE'
+				'TRUE',
 			];
 			conn.query(sql, values, (error, result) => {
 				if (error) {
@@ -185,11 +184,7 @@ router.post('/update_product', (req, res) => {
 				}
 				
 				sql = 'UPDATE Products SET published=FALSE WHERE Product_id=?';
-				values = [
-					// eslint-disable-next-line comma-dangle
-					req.body.Product_id
-				];
-				conn.query(sql, values, (error2, result2) => {
+				conn.query(sql, [req.body.Product_id], (error2, result2) => {
 					if (error2) {
 						conn.rollback(() => {
 							sendError();
