@@ -104,7 +104,7 @@ router.get('/image/:product_id', (req, res) => {
 		});
 });
 
-router.post('/publish_product', (req, res) => {
+router.post('/publish', (req, res) => {
 	pool.query('UPDATE Products SET published=TRUE WHERE Product_id=?;', [req.body.Product_id])
 		.on('result', () => {
 			res.status(200);
@@ -120,7 +120,7 @@ router.post('/publish_product', (req, res) => {
 		});
 });
 
-router.post('/unpublish_product', (req, res) => {
+router.post('/unpublish', (req, res) => {
 	pool.query('UPDATE Products SET published=FALSE WHERE Product_id=?;', [req.body.Product_id])
 		.on('result', () => {
 			res.status(200);
@@ -138,91 +138,108 @@ router.post('/unpublish_product', (req, res) => {
 
 router.post('/update_product', (req, res) => {
 	// we need to unpublish the old product and create a new, updated one in its stead. We also need to fix product already in basket
-	pool.getConnection((connErr, conn) => {
-		const sendError = () => {
-			conn.release();
-			res.send({
-				success: false,
+	let conn;
+
+	const sendError = () => {
+		conn.release();
+		res.send({
+			success: false,
+		});
+	};
+
+	const commit = (error) => {
+		if (error) {
+			conn.rollback(() => {
+				sendError();
 			});
-		};
-		if (connErr) {
+			return;
+		}
+		conn.release();
+		res.send({
+			success: true,
+		});
+	};
+
+	const onUnpublishOld = (error) => {
+		if (error) {
+			console.log(error);
+			conn.rollback(() => {
+				sendError();
+			});
+			return;
+		}
+		console.log('Unpublished old product');
+
+		conn.commit(commit);
+	};
+
+	const onInsertedNew = (error) => {
+		if (error) {
+			console.log(error);
+			conn.rollback(() => {
+				sendError();
+			});
+			return;
+		}
+		console.log('Inserted new product');
+
+		const sql = 'UPDATE Products SET published=FALSE WHERE Product_id=?';
+		conn.query(sql, [req.body.product.Product_id], onUnpublishOld);
+	};
+
+	const transaction = (err) => {
+		if (err) {
+			console.error(err);
 			sendError();
 			return;
 		}
-		conn.beginTransaction((err) => {
-			if (err) {
-				console.error(err);
-				sendError();
-				return;
-			}
+		console.log('Begin transaction');
 
-			// create a new product
-			let sql = 'INSERT INTO Products '
-			+ ' (product_name, img_address, price, description, manufacturer, radius, units_sold, color, rpm, effect, sound, category, published)'
-			+ ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-			let values = [
-				req.body.productName,
-				req.body.img_address,
-				req.body.price,
-				req.body.description,
-				req.body.manufacturer,
-				req.body.radius,
-				req.body.units_sold,
-				req.body.color,
-				req.body.rpm,
-				req.body.effect,
-				req.body.sound,
-				req.body.category,
-				'TRUE',
-			];
-			conn.query(sql, values, (error, result) => {
-				if (error) {
-					conn.rollback(() => {
-						sendError();
-					});
-					return;
-				}
-				
-				sql = 'UPDATE Products SET published=FALSE WHERE Product_id=?';
-				conn.query(sql, [req.body.Product_id], (error2, result2) => {
-					if (error2) {
-						conn.rollback(() => {
-							sendError();
-						});
-						return;
-					}
+		// create a new product
+		const sql = 'INSERT INTO Products SET ?';
+		// + ' (product_name, img_address, price, description, manufacturer, radius, units_sold, color, rpm, effect, sound, category, published)'
+		// + ` VALUES (${'?, '.repeat(12)}?)`;
+		// const values = [
+		// 	req.body.product_name,
+		// 	req.body.img_address,
+		// 	req.body.price,
+		// 	req.body.description,
+		// 	req.body.manufacturer,
+		// 	req.body.radius,
+		// 	req.body.units_sold,
+		// 	req.body.color,
+		// 	req.body.rpm,
+		// 	req.body.effect,
+		// 	req.body.sound,
+		// 	req.body.category,
+		// 	'TRUE',
+		// ];
+		conn.query(sql, { ...req.body.product, Product_id: null, published: 1 }, onInsertedNew);
+	};
 
-					// REMEMBER TO RETIE THE REVIEWS
-					conn.commit((e) => {
-						if (e) {
-							conn.rollback(() => {
-								sendError();
-							});
-							return;
-						}
-						conn.release();
-						res.send({
-							success: true,
-						});
-					});
-				});
-			});
-		});
+	pool.getConnection((connErr, c) => {
+		conn = c;
+		if (connErr) {
+			console.log(connErr);
+			sendError();
+			return;
+		}
+		conn.beginTransaction(transaction);
 	});
 
-	pool.query(sql)
-		.on('result', () => {
-			res.status(200);
-			res.send({
-				success: true,
-			});
-		})
-		.on('error', () => {
-			res.status(500);
-			res.send({
-				success: false,
-			});
-		});
+	// pool.query(sql)
+	// 	.on('result', () => {
+	// 		res.status(200);
+	// 		res.send({
+	// 			success: true,
+	// 		});
+	// 	})
+	// 	.on('error', () => {
+	// 		res.status(500);
+	// 		res.send({
+	// 			success: false,
+	// 		});
+	// 	});
 });
 
 module.exports = router;
