@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post('/create', (req, res) => {
 	const sql = 'INSERT INTO Products '
-		+ '(Product_id, product_name, manufacturer, img_address, price, description, category, radius ) '
-		+ 'VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+		+ '(Product_id, product_name, manufacturer, img_address, price, description, category, radius, rpm ) '
+		+ 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 	const {
 		Product_id: productId,
 		product_name: productName,
@@ -18,8 +18,9 @@ router.post('/create', (req, res) => {
 		description,
 		category,
 		radius,
+		rpm,
 	} = req.body;
-	pool.query(sql, [productId, productName, manufacturer, imgAddress, price, description, category, radius])
+	pool.query(sql, [productId, productName, manufacturer, imgAddress, price, description, category, radius, rpm])
 		.on('result', (r) => {
 			res.send({
 				success: true,
@@ -171,7 +172,7 @@ router.post('/update_product', (req, res) => {
 				req.body.rpm,
 				req.body.effect,
 				req.body.sound,
-				req.body.catagory,
+				req.body.category,
 				// eslint-disable-next-line comma-dangle
 				'TRUE'
 			];
