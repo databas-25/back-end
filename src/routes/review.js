@@ -21,7 +21,7 @@ router.post('/getForProduct', (req, res) => {
 
 router.post('/post', (req, res) => {
 	const sql = 'INSERT INTO Reviews (Reviews_User_id, Reviews_Product_id, title, rating, body, reviewTime) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP())';
-	pool.query(sql, [req.body.userID, req.body.productID, req.body.title, req.body.rating, req.body.body])
+	pool.query(sql, [req.user.user, req.body.productID, req.body.title, req.body.rating, req.body.body])
 		.on('result', (r) => {
 			res.send({
 				success: true,

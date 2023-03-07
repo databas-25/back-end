@@ -21,7 +21,7 @@ router.post('/fetch_items', (req, res) => {
 			+ ' 	Basket_Items.Users_User_id = ?;';
 
 		const rows = [];
-		pool.query(sql, [req.body.userId])
+		pool.query(sql, [req.user?.user])
 			.on('result', (r) => {
 				rows.push(r);
 			})
@@ -36,7 +36,7 @@ router.post('/fetch_items', (req, res) => {
 });
 
 router.post('/get_amount', (req, res) => {
-	pool.query('SELECT Sum(amount) AS total_amount FROM Basket_Items WHERE Users_User_id=?', [req.body.userId], (error, result) => {
+	pool.query('SELECT Sum(amount) AS total_amount FROM Basket_Items WHERE Users_User_id=?', [req.user?.user], (error, result) => {
 		if (error) {
 			res.send({
 				success: false,
@@ -59,10 +59,10 @@ router.post('/add_item', (req, res) => {
 	const sql = 'INSERT INTO Basket_Items '
 		+ '(Users_User_id, Products_Product_id, Amount) '
 		+ 'VALUES '
-		+ '(?, ?, ?)'
+		+ '(?, ?, ?) '
 		+ 'ON DUPLICATE KEY UPDATE '
 		+ 'Amount = Amount + 1';
-	pool.query(sql, [req.body.userID, req.body.productID, 1]);
+	pool.query(sql, [req.user.user, req.body.productID, 1]);
 	// req.mysql.query("INSERT INTO Basket_Items (Users_User_id, Products_Product_id, Amount)
 	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
@@ -78,13 +78,13 @@ router.post('/add_item', (req, res) => {
 		+ '(?, ?, ?)'
 		+ 'ON DUPLICATE KEY UPDATE '
 		+ 'Amount = Amount + 1';
-	pool.query(sql, [req.body.userID, req.body.productID, 1]);
+	pool.query(sql, [req.user.user, req.body.productID, 1]);
 	// req.mysql.query("INSERT INTO Basket_Items (Users_User_id, Products_Product_id, Amount)
 	// VALUES (?,?,?) ON DUPLICATE KEY UPDATE Amount = Amount + 1", [req.body.userID, req.body.productID, 1]);
 });
 
 router.post('/clearUser', (req, res) => {
-	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID])
+	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.user.user])
 		.on('result', (r) => {
 			res.send({
 				success: true,
@@ -99,7 +99,7 @@ router.post('/clearUser', (req, res) => {
 });
 
 router.post('/clearItem', (req, res) => {
-	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ? AND Products_Product_id = ?', [req.body.userID, req.body.productID])
+	pool.query('DELETE FROM Basket_Items WHERE Users_User_id = ? AND Products_Product_id = ?', [req.user.user, req.body.productID])
 		.on('result', (r) => {
 			res.send({
 				success: true,
@@ -114,7 +114,7 @@ router.post('/clearItem', (req, res) => {
 });
 
 router.post('/update_amount', (req, res) => {
-	pool.query('UPDATE Basket_Items SET amount=? WHERE Products_Product_id=? AND Users_User_id=?', [req.body.amount, req.body.productID, req.body.userID])
+	pool.query('UPDATE Basket_Items SET amount=? WHERE Products_Product_id=? AND Users_User_id=?', [req.body.amount, req.body.productID, req.user.user])
 		.on('result', () => {
 			res.status(200);
 			res.send({

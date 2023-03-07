@@ -40,7 +40,7 @@ router.post('/place', (req, res) => {
 			return;
 		}
 
-		conn.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID], onBasketItemsDeleted);
+		conn.query('DELETE FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasketItemsDeleted);
 	};
 
 	const onOrderInserted = (error, result) => {
@@ -74,7 +74,7 @@ router.post('/place', (req, res) => {
 			return;
 		}
 		basket = results;
-		conn.query('INSERT INTO `Order` (Users_User_id, timestamp) VALUES (?, CURRENT_TIMESTAMP());', [req.body.userID], onOrderInserted);
+		conn.query('INSERT INTO `Order` (Users_User_id, timestamp) VALUES (?, CURRENT_TIMESTAMP());', [req.user.user], onOrderInserted);
 	};
 
 	const transaction = (error) => {
@@ -85,7 +85,7 @@ router.post('/place', (req, res) => {
 		}
 
 		// get the user basket
-		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.body.userID], onBasket);
+		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
 		// .on('result', (r) => {
 		// 	basket.push(r);
 		// });
@@ -120,7 +120,7 @@ router.post('/getHistory', (req, res) => {
 		+ 'FROM `Order` JOIN `Order_Item` ON `Order`.Order_id=`Order_Item`.Order_Order_id '
 		+ 'WHERE `Order`.Users_User_id=?;'; */
 	const items = [];
-	pool.query(sql, [req.body.userID])
+	pool.query(sql, [req.user.user])
 		.on('result', (r) => {
 			items.push(r);
 		})

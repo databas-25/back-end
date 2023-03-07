@@ -96,8 +96,7 @@ router.post('/sign_in', (req, res) => { // for logging in
 
 router.post('/token_sign_in', (req, res) => {
 	try {
-		const { user, username, email } = jwt.verify(req.body.token, process.env.ACCESS_TOKEN_SECRET, jwtOptions);
-		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [user, username, email])
+		pool.query('SELECT * FROM Users WHERE User_id=? AND user_name=? AND email=?', [req.user.user, req.user.username, req.user.email])
 			.on('result', (r) => {
 				res.send({
 					success: true,
@@ -139,9 +138,9 @@ router.post('/update', (req, res) => {
 			+ 'user_name = ?, '
 			+ 'email = ? '
 			+ 'WHERE '
-			+ 'User_id = ? ', [req.body.username, req.body.email, req.body.user])
+			+ 'User_id = ? ', [req.user.username, req.user.email, req.user.user])
 			.on('result', (r) => {
-				res.send({ success: true, result: r, user: getUser(req.body.user) });
+				res.send({ success: true, result: r, user: getUser(req.user.user) });
 			}).on('error', (e) => {
 				res.send({ success: false, error: e, message: 'Error from database when trying to update user info' });
 			});
@@ -152,7 +151,7 @@ router.post('/update', (req, res) => {
 
 router.post('/change_password', async (req, res) => {
 	const passwordHash = await bcrypt.hash(req.body.password, 10);
-	pool.query('UPDATE Users SET password_hash = ? WHERE User_id = ?', [passwordHash, req.body.user])
+	pool.query('UPDATE Users SET password_hash = ? WHERE User_id = ?', [passwordHash, req.user.user])
 		.on('result', (r) => {
 			res.send({ success: true, result: r });
 		})
