@@ -7,7 +7,7 @@ router.post('/place', (req, res) => {
 	let sendError = () => {};
 	let conn;
 	let basket;
-
+ 
 	const onCommit = (error) => {
 		if (error) {
 			conn.rollback(() => {
@@ -20,6 +20,31 @@ router.post('/place', (req, res) => {
 			success: true,
 		});
 	};
+	const reduceStock = (error) =>{
+		if (error) {
+			console.error(error);
+			sendError();
+			return;
+		}
+		const sql = 'SELECT `Products`.`Product_id`, `Products`.`stock`, `Basket_Items`.`amount`, `Basket_Items`.`Users_User_id` FROM `Basket_Items` INNER JOIN `Products` WHERE `Products`.`Product_id` = `Basket_Items`.Products_Product_id AND `Basket_Items`.`Users_User_id` = ?'
+		conn.query(sql,[req.user.user])
+		.on('result', (r) =>{
+			console.log(r.amount  >= r.stock)
+			if( r.amount  > r.stock ){
+				res.send({
+					success: false,
+				});
+				sendError();
+				return
+			}else{
+				console.log([(r.stock - r.amount), r.Product_id])
+				conn.query('UPDATE `Products` SET `Products`.`stock` = ? WHERE `Products`.`Product_id` = ?', [r.stock-r.amount, r.Product_id])
+				.on('result', (r) =>{})
+				.on('error',(e) => {});
+			}
+		})
+		.on('end', onCommit);
+	}
 
 	const onBasketItemsDeleted = (error, result) => {
 		if (error || result.affectedRows === 0) {
@@ -29,7 +54,7 @@ router.post('/place', (req, res) => {
 			return;
 		}
 
-		conn.commit(onCommit);
+		conn.commit(reduceStock);
 	};
 
 	const onOrderItemsInserted = (error) => {
@@ -66,6 +91,7 @@ router.post('/place', (req, res) => {
 		conn.query(sql, [values], onOrderItemsInserted);
 	};
 
+
 	const onBasket = (error, results) => {
 		if (error) {
 			conn.rollback(() => {
@@ -84,13 +110,9 @@ router.post('/place', (req, res) => {
 			return;
 		}
 
-		// get the user basket
-		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
-		// .on('result', (r) => {
-		// 	basket.push(r);
-		// });
 
-		// insert order
+		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
+
 	};
 
 	const connect = (connErr, c) => {
@@ -107,6 +129,8 @@ router.post('/place', (req, res) => {
 		}
 		conn.beginTransaction(transaction);
 	};
+
+
 
 	pool.getConnection(connect);
 });
