@@ -7,7 +7,7 @@ router.post('/place', (req, res) => {
 	let sendError = () => {};
 	let conn;
 	let basket;
- 
+
 	const onCommit = (error) => {
 		if (error) {
 			conn.rollback(() => {
@@ -20,41 +20,15 @@ router.post('/place', (req, res) => {
 			success: true,
 		});
 	};
-	const reduceStock = (error) =>{
-		if (error) {
-			console.error(error);
-			sendError();
-			return;
-		}
-		const sql = 'SELECT `Products`.`Product_id`, `Products`.`stock`, `Basket_Items`.`amount`, `Basket_Items`.`Users_User_id` FROM `Basket_Items` INNER JOIN `Products` WHERE `Products`.`Product_id` = `Basket_Items`.Products_Product_id AND `Basket_Items`.`Users_User_id` = ?'
-		conn.query(sql,[req.user.user])
-		.on('result', (r) =>{
-			console.log(r.amount  >= r.stock)
-			if( r.amount  > r.stock ){
-				res.send({
-					success: false,
-				});
-				sendError();
-				return
-			}else{
-				console.log([(r.stock - r.amount), r.Product_id])
-				conn.query('UPDATE `Products` SET `Products`.`stock` = ? WHERE `Products`.`Product_id` = ?', [r.stock-r.amount, r.Product_id])
-				.on('result', (r) =>{})
-				.on('error',(e) => {});
-			}
-		})
-		.on('end', onCommit);
-	}
 
-	const onBasketItemsDeleted = (error, result) => {
-		if (error || result.affectedRows === 0) {
+	const onBasketItemsDeleted = (error) => {
+		if (error) {
 			conn.rollback(() => {
 				sendError();
 			});
 			return;
 		}
-
-		conn.commit(reduceStock);
+		conn.commit(onCommit);
 	};
 
 	const onOrderItemsInserted = (error) => {
@@ -91,7 +65,6 @@ router.post('/place', (req, res) => {
 		conn.query(sql, [values], onOrderItemsInserted);
 	};
 
-
 	const onBasket = (error, results) => {
 		if (error) {
 			conn.rollback(() => {
@@ -103,25 +76,68 @@ router.post('/place', (req, res) => {
 		conn.query('INSERT INTO `Order` (Users_User_id, timestamp) VALUES (?, CURRENT_TIMESTAMP());', [req.user.user], onOrderInserted);
 	};
 
-	const transaction = (error) => {
+	const onReducedStock = () => {
+		console.log('Succeeded');
+		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
+	};
+
+	const onGetStock = (error, result) => {
 		if (error) {
-			console.error(error);
-			sendError();
+			conn.rollback(() => {
+				sendError();
+			});
 			return;
 		}
+		Promise.all(result.map((r) => new Promise((resolve, reject) => {
+			if (r.amount > r.stock) {
+				res.send({
+					success: false,
+				});
+				sendError();
+				reject();
+			}
+			conn.query('UPDATE `Products` SET `Products`.`stock` = ? WHERE `Products`.`Product_id` = ?', [r.stock - r.amount, r.Product_id], (e, re) => {
+				if (e) {
+					reject(e);
+					return;
+				}
+				resolve(re);
+			});
+		})))
+			.then(onReducedStock)
+			.catch(() => {
+				conn.rollback(() => {
+					sendError();
+				});
+			});
+	};
 
-
-		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
-
+	const transaction = (error) => {
+		if (error) {
+			conn.rollback(() => {
+				sendError();
+			});
+			return;
+		}
+		const sql = 'SELECT'
+			+ ' Product_id, stock,'
+			+ ' amount, Users_User_id '
+			+ 'FROM `Basket_Items` '
+			+ 'LEFT JOIN `Products` '
+			+ 'ON Product_id = Products_Product_id '
+			+ 'WHERE Users_User_id = ?';
+		conn.query(sql, [req.user.user], onGetStock);
 	};
 
 	const connect = (connErr, c) => {
 		conn = c;
 		sendError = () => {
-			conn.release();
-			res.send({
-				success: false,
-			});
+			try {
+				conn.release();
+				res.send({
+					success: false,
+				});
+			} catch (e) { /* */ }
 		};
 		if (connErr) {
 			sendError();
@@ -129,8 +145,6 @@ router.post('/place', (req, res) => {
 		}
 		conn.beginTransaction(transaction);
 	};
-
-
 
 	pool.getConnection(connect);
 });
