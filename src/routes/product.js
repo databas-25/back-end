@@ -136,6 +136,22 @@ router.post('/unpublish', (req, res) => {
 		});
 });
 
+router.post('/update_stock', (req, res) => {
+	pool.query('UPDATE Products SET stock=? WHERE Product_id=?;', [req.body.stock, req.body.productId], (error, result) => {
+		if (error) {
+			res.send({
+				success: false,
+				error,
+			});
+			return;
+		}
+		res.send({
+			success: true,
+			result,
+		});
+	});
+});
+
 router.post('/update_product', (req, res) => {
 	// we need to unpublish the old product and create a new, updated one in its stead. We also need to fix product already in basket
 	let conn;
@@ -181,7 +197,6 @@ router.post('/update_product', (req, res) => {
 			});
 			return;
 		}
-		console.log('Inserted new product');
 
 		const sql = 'UPDATE Products SET published=FALSE WHERE Product_id=?';
 		conn.query(sql, [req.body.product.Product_id], onUnpublishOld);
