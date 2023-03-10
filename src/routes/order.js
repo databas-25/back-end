@@ -111,6 +111,27 @@ router.post('/place', (req, res) => {
 	pool.getConnection(connect);
 });
 
+router.post('/getAll', (req, res) => {
+	const sql = 'SELECT * FROM `Order` '
+	+ ' LEFT JOIN Users ON `Order`.`Users_User_id`=`Users`.`User_id` '
+	+ ' WHERE `Users`.`permission`< 10'
+
+	pool.query(sql, (error, result) => {
+		if (error) {
+			res.send({
+				success: false,
+				error_data: error,
+			});
+			return;
+		}
+		res.send({
+			success: true,
+			result: result,
+		});
+	})
+
+});
+
 router.post('/getHistory', (req, res) => {
 	const sql = 'SELECT * FROM `Order` '
 	+ ' LEFT JOIN Order_Item ON `Order`.`Order_id`=Order_Item.Order_Order_id '
