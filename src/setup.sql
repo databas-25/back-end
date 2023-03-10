@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `product_name` VARCHAR(45) NOT NULL,
   `img_address` MEDIUMTEXT NULL DEFAULT NULL,
   `price` INT(11) NOT NULL,
+  `stock` INT(11) NOT NULL,
   `description` MEDIUMTEXT NULL DEFAULT NULL,
   `manufacturer` VARCHAR(45) NULL DEFAULT NULL,
   `radius` INT(11) NULL DEFAULT NULL,
@@ -102,7 +103,6 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Reviews` (
   `Reviews_User_id` INT(11) NOT NULL,
   `Reviews_Product_id` INT(11) NOT NULL,
-  `title` TINYTEXT NULL DEFAULT NULL,
   `rating` INT(1) NULL DEFAULT NULL,
   `body` MEDIUMTEXT NULL DEFAULT NULL,
   `reviewTime` DATETIME NULL DEFAULT NULL,
