@@ -103,6 +103,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `shopping_db`.`Reviews` (
   `Reviews_User_id` INT(11) NOT NULL,
   `Reviews_Product_id` INT(11) NOT NULL,
+  `title` TINYTEXT NULL DEFAULT NULL,
   `rating` INT(1) NULL DEFAULT NULL,
   `body` MEDIUMTEXT NULL DEFAULT NULL,
   `reviewTime` DATETIME NULL DEFAULT NULL,
