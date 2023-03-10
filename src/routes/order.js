@@ -77,7 +77,6 @@ router.post('/place', (req, res) => {
 	};
 
 	const onReducedStock = () => {
-		console.log('Succeeded');
 		conn.query('SELECT * FROM Basket_Items WHERE Users_User_id = ?', [req.user.user], onBasket);
 	};
 
