@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `shopping_db`.`Products` (
   `product_name` VARCHAR(45) NOT NULL,
   `img_address` MEDIUMTEXT NULL DEFAULT NULL,
   `price` INT(11) UNSIGNED NOT NULL,
-  `stock` INT(11) NOT NULL,
+  `stock` INT(11) NOT NULL DEFAULT 10,
   `description` MEDIUMTEXT NULL DEFAULT NULL,
   `manufacturer` VARCHAR(45) NULL DEFAULT NULL,
   `radius` INT(11) NULL DEFAULT NULL,

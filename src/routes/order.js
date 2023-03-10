@@ -113,8 +113,8 @@ router.post('/place', (req, res) => {
 
 router.post('/getAll', (req, res) => {
 	const sql = 'SELECT * FROM `Order` '
-	+ ' LEFT JOIN Users ON `Order`.`Users_User_id`=`Users`.`User_id` '
-	+ ' WHERE `Users`.`permission`< 10'
+		+ ' LEFT JOIN Users ON `Order`.`Users_User_id`=`Users`.`User_id` '
+		+ ' WHERE `Users`.`permission`< 10';
 
 	pool.query(sql, (error, result) => {
 		if (error) {
@@ -126,10 +126,9 @@ router.post('/getAll', (req, res) => {
 		}
 		res.send({
 			success: true,
-			result: result,
+			result,
 		});
-	})
-
+	});
 });
 
 router.post('/getHistory', (req, res) => {
