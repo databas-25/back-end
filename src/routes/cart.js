@@ -35,6 +35,26 @@ router.post('/fetch_items', (req, res) => {
 	}
 });
 
+router.post('/getAll', (req, res) => {
+	const sql = 'SELECT * FROM `Basket_Items` '
+		+ ' LEFT JOIN Users ON `Basket_Items`.`Users_User_id`=`Users`.`User_id` '
+		+ ' WHERE `Users`.`permission`< 10';
+
+		pool.query(sql, (error, result) => {
+			if (error) {
+				res.send({
+					success: false,
+					error_data: error,
+				});
+				return;
+			}
+			res.send({
+				success: true,
+				result,
+			});
+		});
+})
+
 router.post('/get_amount', (req, res) => {
 	pool.query('SELECT Sum(amount) AS total_amount FROM Basket_Items WHERE Users_User_id=?', [req.user?.user], (error, result) => {
 		if (error) {
